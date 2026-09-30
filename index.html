@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Mi Progreso Pro v7</title>
+<title>Mi Progreso Pro v6</title>
 <link rel="manifest" href="manifest.json">
 <style>
 :root{--blue:#2563eb;--blue2:#1d4ed8;--bg:#f4f6fa;--card:#fff;--text:#152033;--muted:#687386;--line:#e5e9ef;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--shadow:0 6px 22px #1018280b}
@@ -37,64 +37,25 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 .hide{display:none!important}.footerNote{font-size:11px;color:var(--muted);text-align:center;margin:16px}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#172033;color:#fff;padding:11px 15px;border-radius:12px;font-size:13px;font-weight:700;z-index:200;box-shadow:0 8px 30px #0003}
 @media(min-width:700px){.modalBack{align-items:center}.modal{border-radius:22px}.quickGrid{grid-template-columns:repeat(3,1fr)}}
-
-.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow:auto;padding:8px 10px;background:var(--bg,#f6f7fb);border-bottom:1px solid #e7e9ef}
-.tab{border:0;background:#fff;padding:9px 12px;border-radius:12px;white-space:nowrap;font-weight:700}
-.tab.active{background:#111827;color:#fff}
-.tabPanel{display:none}.tabPanel.active{display:block}
-.quickActions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
-.quickActions button{padding:11px 5px;border:0;border-radius:12px;background:#fff;font-weight:700}
-.sectionTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.mealCard{border:1px solid #e6e8ee;border-radius:14px;padding:12px;margin:8px 0;background:#fff}
-.mealHead{display:flex;justify-content:space-between;align-items:center}
-.foodLine{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #f0f1f4;font-size:.92rem}
-.kpiGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.kpi{padding:12px;border-radius:14px;background:#fff;border:1px solid #e6e8ee}
-.kpi b{font-size:1.15rem}.muted{color:#68707d;font-size:.88rem}
-.streak{font-size:2rem;font-weight:800}
-.recipeCard{border:1px solid #e6e8ee;border-radius:14px;padding:12px;margin:8px 0}
-@media(min-width:700px){.quickActions{grid-template-columns:repeat(4,160px)}.kpiGrid{grid-template-columns:repeat(4,1fr)}}
+</style>
+<style>
+#statsPanel .miniStat,#progressPanel .miniStat{display:inline-block;margin:5px;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+.v9line{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid #edf0f3}
+.recipeBox{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:8px 0}
 </style>
 </head>
 <body>
-<nav class="tabs" id="mainTabs">
- <button class="tab active" data-tab="today">🏠 Hoy</button>
- <button class="tab" data-tab="stats">📊 Estadísticas</button>
- <button class="tab" data-tab="favorites">⭐ Favoritos</button>
- <button class="tab" data-tab="recipes">🍳 Recetas</button>
- <button class="tab" data-tab="progress">🏆 Progreso</button>
-</nav>
-
-<section class="tabPanel active" id="tab-today">
-<div class="card">
- <div class="sectionTitle"><div><h2 style="margin:0">Hoy</h2><div class="muted" id="todaySubtitle"></div></div><div class="streak" id="todayStreak">🔥 0</div></div>
- <div class="quickActions">
-  <button id="quickFood">🍽️<br>Comida</button>
-  <button id="quickActivity">🚶<br>Actividad</button>
-  <button id="quickStrength">💪<br>Fuerza</button>
-  <button id="quickWeight">⚖️<br>Peso</button>
- </div>
-</div>
-
-<div class="card">
- <div class="sectionTitle"><h2 style="margin:0">🍽️ Comidas</h2><span class="muted" id="todayFoodSummary"></span></div>
- <div id="mealsDashboard"></div>
-</div>
-
-<div class="card">
- <div class="sectionTitle"><h2 style="margin:0">🏃 Actividad</h2><span class="muted" id="todayActivitySummary"></span></div>
- <div id="activityDashboard"></div>
-</div>
-
-<div class="card">
- <div class="sectionTitle"><h2 style="margin:0">📌 Resumen</h2></div>
- <div class="kpiGrid" id="todayKpis"></div>
-</div>
 <div class="app">
 <header class="hero"><h1>💪 Mi Progreso Pro</h1><p>Comida · actividad · peso · evolución</p></header>
 <div class="content">
 <nav class="tabs">
-<button class="active" data-tab="today">Hoy</button><button data-tab="history">Historial</button><button data-tab="settings">Ajustes</button>
+<button class="active" data-tab="today">🏠 Hoy</button>
+<button data-tab="stats">📊 Estadísticas</button>
+<button data-tab="favorites">⭐ Favoritos</button>
+<button data-tab="recipes">🍳 Recetas</button>
+<button data-tab="progress">🏆 Progreso</button>
+<button data-tab="history">Historial</button>
+<button data-tab="settings">Ajustes</button>
 </nav>
 
 <section id="today">
@@ -138,6 +99,18 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 <p class="hint">El gasto total estimado = gasto diario de base + ejercicio registrado. Es una estimación, no una medición exacta.</p></div>
 </section>
 
+<section id="stats" class="hide">
+<div class="card"><h2>📊 Estadísticas semanales</h2><div id="statsPanel"></div></div>
+</section>
+<section id="favorites" class="hide">
+<div class="card"><h2>⭐ Favoritos</h2><div class="hint">Guarda los alimentos que utilizas mucho y añádelos rápidamente.</div><div id="favoritesPanel"></div></div>
+</section>
+<section id="recipes" class="hide">
+<div class="card"><h2>🍳 Recetas</h2><div id="recipesPanel"></div><button class="primary" id="newRecipeBtn">＋ Nueva receta</button></div>
+</section>
+<section id="progress" class="hide">
+<div class="card"><h2>🏆 Progreso</h2><div id="progressPanel"></div></div>
+</section>
 <section id="history" class="hide">
 <div class="card"><h2>📊 Resumen</h2><div class="hint" id="trendText">Sin datos suficientes para tendencia</div><div class="stats"><div class="stat"><div class="num" id="avgFood">0</div><div class="lab">kcal medias/día</div></div><div class="stat"><div class="num" id="avgEx">0</div><div class="lab">kcal ejercicio/día</div></div><div class="stat"><div class="num" id="weekWeight">—</div><div class="lab">peso más reciente</div></div><div class="stat"><div class="num" id="daysCount">0</div><div class="lab">días registrados</div></div></div></div>
 <div class="card"><h2>⚖️ Evolución del peso</h2><canvas id="weightChart"></canvas></div>
@@ -160,11 +133,6 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 
 <div id="modalRoot"></div><div id="toast" class="toast hide"></div>
 
-</section>
-<section class="tabPanel" id="tab-stats"><div class="card"><h2>📊 Estadísticas</h2><div id="statsPanel"></div></div></section>
-<section class="tabPanel" id="tab-favorites"><div class="card"><h2>⭐ Favoritos</h2><div id="favoritesPanel"></div></div></section>
-<section class="tabPanel" id="tab-recipes"><div class="card"><h2>🍳 Recetas</h2><div id="recipesPanel"></div><button class="primary" id="newRecipeBtn">＋ Nueva receta</button></div></section>
-<section class="tabPanel" id="tab-progress"><div class="card"><h2>🏆 Progreso</h2><div id="progressPanel"></div></div></section>
 <script>
 (function(){
 "use strict";
@@ -196,19 +164,20 @@ const EX_DEFAULT=[
 {id:"stairs",name:"Escaleras",emoji:"🏢"},
 {id:"steps",name:"Pasos",emoji:"👟"}
 ];
-const KEY="MI_PROGRESO_PRO_V7";
+const KEY="MI_PROGRESO_PRO_V9";
 let state=load();
 let current=new Date().toISOString().slice(0,10);
 
 function load(){
  try{
   const x=JSON.parse(localStorage.getItem(KEY)||"null");
-  if(x&&x.days&&x.settings)return x;
-  const old=JSON.parse(localStorage.getItem("MI_PROGRESO_PRO_V6")||localStorage.getItem("MI_PROGRESO_PRO_V5")||localStorage.getItem("MI_PROGRESO_PRO_V4")||"null");
+  if(x&&x.days&&x.settings){x.foods=FOOD_DEFAULT;return x;}
+  const old=JSON.parse(localStorage.getItem("MI_PROGRESO_PRO_V8")||localStorage.getItem("MI_PROGRESO_PRO_V7")||localStorage.getItem("MI_PROGRESO_PRO_V6")||localStorage.getItem("MI_PROGRESO_PRO_V5")||"null");
   if(old&&old.days&&old.settings){
     old.settings.goalWeight=old.settings.goalWeight||85;
     old.settings.proteinGoal=old.settings.proteinGoal||160;
-    old.foods=old.foods||FOOD_DEFAULT; old.settings.goalWeight=old.settings.goalWeight||85; old.settings.proteinGoal=old.settings.proteinGoal||160; return old;
+    old.foods=FOOD_DEFAULT;
+    return old;
   }
  }catch(e){}
  return {settings:{age:25,height:185,weight:90,goalWeight:85,proteinGoal:160,activity:1.2,deficit:300,target:2100},foods:FOOD_DEFAULT,days:{}};
@@ -228,31 +197,7 @@ function renderFoodButtons(){
  el("foodButtons").innerHTML=state.foods.map((f,i)=>`<button class="quick" data-food="${i}"><b>${f.emoji} ${f.name}</b><small>Por defecto ${f.defaultQty}${f.unit} · ${f.perUnit?f.kcal100:f.kcal100+"/100g"} kcal</small></button>`).join("");
  document.querySelectorAll("[data-food]").forEach(b=>b.onclick=()=>openFood(+b.dataset.food));
 }
-
-function renderTodayDashboard(){
- const names={Desayuno:"🌅 Desayuno",Comida:"🍽️ Comida",Merienda:"☕ Merienda",Cena:"🌙 Cena",Otro:"📦 Otro"};
- const meals=MEALS.map(m=>{
-  const items=mealData(m), kcal=items.reduce((s,x)=>s+(+x.kcal||0),0);
-  return `<div class="mealCard"><div class="mealHead"><b>${names[m]}</b><b>${fmt(kcal)} kcal</b></div>${items.length?items.map(x=>`<div class="foodLine"><span>${x.emoji||"🍽️"} ${x.name} · ${x.qty}${x.unit}</span><span>${fmt(x.kcal)}</span></div>`).join(""):`<div class="muted" style="padding-top:7px">Sin alimentos · <button class="secondary mealAdd" data-meal="${m}">＋ Añadir</button></div>`}</div>`;
- }).join("");
- el("mealsDashboard").innerHTML=meals;
- el("mealsDashboard").querySelectorAll(".mealAdd").forEach(b=>b.onclick=()=>openFoodForMeal(b.dataset.meal));
-
- const ex=day().exercise||[];
- el("activityDashboard").innerHTML=ex.length?ex.map(x=>`<div class="foodLine"><span>${x.emoji||"🏃"} <b>${x.name}</b><br><span class="muted">${x.detail||""}</span></span><span>${fmt(x.kcal||0)} kcal</span></div>`).join(""):`<div class="muted">Sin actividad registrada hoy.</div>`;
- const foodK=day().food.reduce((s,x)=>s+(+x.kcal||0),0), protein=day().food.reduce((s,x)=>s+(+x.protein||0),0), exK=ex.reduce((s,x)=>s+(+x.kcal||0),0);
- el("todayFoodSummary").textContent=`${fmt(foodK)} kcal`;
- el("todayActivitySummary").textContent=`${fmt(exK)} kcal estimadas`;
- el("todaySubtitle").textContent=new Date(current+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
- el("todayStreak").textContent=`🔥 ${streakDays()}`;
- el("todayKpis").innerHTML=`<div class="kpi"><div class="muted">Calorías</div><b>${fmt(foodK)}</b><div class="muted">/ ${fmt(target())} kcal</div></div><div class="kpi"><div class="muted">Proteína</div><b>${round(protein,0)} g</b><div class="muted">/ ${fmt(state.settings.proteinGoal||160)} g</div></div><div class="kpi"><div class="muted">Ejercicio</div><b>${fmt(exK)}</b><div class="muted">kcal estimadas</div></div><div class="kpi"><div class="muted">Peso</div><b>${day().weight?round(day().weight,1):"—"}</b><div class="muted">${day().weight?"kg":"sin registrar"}</div></div>`;
-}
-function openFoodForMeal(meal){
- openFood();
- setTimeout(()=>{if(el("foodMeal"))el("foodMeal").value=meal;},0);
-}
 function render(){
- renderTodayDashboard();
  el("date").value=current;el("weight").value=day().weight||"";
  const foodK=day().food.reduce((s,x)=>s+x.kcal,0), exK=day().exercise.reduce((s,x)=>s+x.kcal,0), burn=baseBurn(weightForDay())+exK;
  const protein=day().food.reduce((s,x)=>s+(+x.protein||0),0);
@@ -278,10 +223,11 @@ function render(){
  renderFoodButtons();renderLog();
 }function renderLog(){
  const d=day(), rows=[];
- d.food.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji||"🍽️"} ${x.name}</div><div class="rowMeta">${x.qty}${x.unit}${x.meal?" · "+x.meal:""}${x.protein?" · "+round(x.protein,1)+" g proteína":""}</div></div><div class="rowRight"><div class="kcal">${fmt(x.kcal)} kcal</div><button class="del" data-del="food" data-i="${i}">×</button></div></div>`));
+ d.food.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji||"🍽️"} ${x.name}</div><div class="rowMeta">${x.qty}${x.unit}${x.meal?" · "+x.meal:""}${x.protein?" · "+round(x.protein,1)+" g proteína":""}</div></div><div class="rowRight"><div class="kcal">${fmt(x.kcal)} kcal</div><button class="secondary" data-fav="${i}">⭐</button><button class="del" data-del="food" data-i="${i}">×</button></div></div>`));
  d.exercise.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji} ${x.name}</div><div class="rowMeta">${x.detail||""}</div>${x.exercises?`<div class="miniList">${x.exercises.map(e=>`<div>• ${e.ex}: ${e.sets}×${e.sec>0?e.sec+" s":e.reps}</div>`).join("")}</div>`:""}</div><div class="rowRight"><div class="kcal">−${fmt(x.kcal)} kcal</div><button class="del" data-del="exercise" data-i="${i}">×</button></div></div>`));
  el("log").innerHTML=rows.join("")||'<div class="empty">Aún no has añadido nada.</div>';
- document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();render();});
+ document.querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const x=day().food[+b.dataset.fav];let f=getFavsV9();if(!f.some(y=>y.name===x.name&&y.qty===x.qty)){f.push({...x});setFavsV9(f);toast("Añadido a favoritos")}else toast("Ya está en favoritos")});
+document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();render();});
 }
 
 function openModal(title,body,buttons){
@@ -487,9 +433,57 @@ function openSteps(){
 }
 
 function switchTab(id){
- document.querySelectorAll("main section");["today","history","settings"].forEach(x=>el(x).classList.toggle("hide",x!==id));
- document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
+ ["today","history","settings","stats","favorites","recipes","progress"].forEach(x=>{if(el(x))el(x).classList.toggle("hide",x!==id)});
+ 
+function v9Summary(ds){
+ const d=state.days[ds]||{food:[],exercise:[],weight:""};
+ return {k:d.food.reduce((s,x)=>s+(+x.kcal||0),0),p:d.food.reduce((s,x)=>s+(+x.protein||0),0),e:d.exercise.reduce((s,x)=>s+(+x.kcal||0),0),w:+d.weight||0};
+}
+function renderStatsV9(){
+ const d=[];const now=new Date(current+"T12:00:00");
+ for(let i=6;i>=0;i--){let x=new Date(now);x.setDate(now.getDate()-i);let ds=x.toISOString().slice(0,10);d.push({ds,...v9Summary(ds)})}
+ const used=d.filter(x=>x.k||x.p||x.e||x.w), avg=(a)=>used.length?Math.round(used.reduce((s,x)=>s+x[a],0)/used.length):0;
+ el("statsPanel").innerHTML=`<div class="stats"><div class="stat"><div class="num">${avg("k")}</div><div class="lab">kcal medias</div></div><div class="stat"><div class="num">${avg("p")} g</div><div class="lab">proteína media</div></div><div class="stat"><div class="num">${avg("e")}</div><div class="lab">kcal ejercicio</div></div></div><h3>Últimos 7 días</h3>`+
+ d.map(x=>`<div class="v9line"><span>${new Date(x.ds+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric"})}</span><span>${x.k} kcal · ${Math.round(x.p)} g · ${x.w?x.w+" kg":"—"}</span></div>`).join("");
+}
+function getFavsV9(){return JSON.parse(localStorage.getItem("MP9_FAVS")||"[]")}
+function setFavsV9(x){localStorage.setItem("MP9_FAVS",JSON.stringify(x))}
+function renderFavoritesV9(){
+ const f=getFavsV9();
+ el("favoritesPanel").innerHTML=f.length?f.map((x,i)=>`<div class="v9line"><span>⭐ ${x.name} · ${x.qty}${x.unit}</span><span>${x.kcal} kcal <button class="secondary" data-fuse="${i}">Usar</button> <button class="danger" data-fdel="${i}">×</button></span></div>`).join(""):'<div class="empty">Todavía no tienes favoritos.</div>';
+ el("favoritesPanel").querySelectorAll("[data-fuse]").forEach(b=>b.onclick=()=>{let x=getFavsV9()[+b.dataset.fuse];day().food.push({...x,meal:"Otro"});save();render();toast("Añadido a hoy")});
+ el("favoritesPanel").querySelectorAll("[data-fdel]").forEach(b=>b.onclick=()=>{let f=getFavsV9();f.splice(+b.dataset.fdel,1);setFavsV9(f);renderFavoritesV9()});
+}
+function getRecipesV9(){return JSON.parse(localStorage.getItem("MP9_RECIPES")||"[]")}
+function setRecipesV9(x){localStorage.setItem("MP9_RECIPES",JSON.stringify(x))}
+function renderRecipesV9(){
+ const r=getRecipesV9();
+ el("recipesPanel").innerHTML=r.length?r.map((x,i)=>`<div class="recipeBox"><b>${x.name}</b> · ${x.kcal} kcal · ${x.protein||0} g proteína<br><span class="hint">${x.ingredients||""}</span><br><button class="secondary" data-ruse="${i}">Añadir hoy</button> <button class="danger" data-rdel="${i}">Eliminar</button></div>`).join(""):'<div class="empty">Aún no has creado recetas.</div>';
+ el("recipesPanel").querySelectorAll("[data-ruse]").forEach(b=>b.onclick=()=>{let x=getRecipesV9()[+b.dataset.ruse];day().food.push({name:x.name,emoji:"🍳",qty:1,unit:"ración",kcal:x.kcal,protein:x.protein||0,meal:"Comida"});save();render();toast("Receta añadida")});
+ el("recipesPanel").querySelectorAll("[data-rdel]").forEach(b=>b.onclick=()=>{let r=getRecipesV9();r.splice(+b.dataset.rdel,1);setRecipesV9(r);renderRecipesV9()});
+}
+el("newRecipeBtn").onclick=()=>{
+ const name=prompt("Nombre de la receta");
+ if(!name)return;
+ const kcal=+prompt("Kcal por ración")||0;
+ if(!kcal)return;
+ const protein=+prompt("Proteína por ración (g)")||0;
+ const ingredients=prompt("Ingredientes (opcional)")||"";
+ const r=getRecipesV9();r.push({name,kcal:Math.round(kcal),protein:Math.round(protein),ingredients});setRecipesV9(r);renderRecipesV9();toast("Receta guardada");
+};
+function renderProgressV9(){
+ const entries=Object.entries(state.days).filter(([,d])=>d.weight).sort((a,b)=>a[0].localeCompare(b[0]));
+ const start=+state.settings.weight||0,last=entries.length?+entries[entries.length-1][1].weight:start,goal=+state.settings.goalWeight||0;
+ el("progressPanel").innerHTML=`<div class="stats"><div class="stat"><div class="num">${start||"—"}</div><div class="lab">peso inicial</div></div><div class="stat"><div class="num">${last||"—"}</div><div class="lab">peso actual</div></div><div class="stat"><div class="num">${goal||"—"}</div><div class="lab">objetivo</div></div></div><h3>Tendencia</h3>`+
+ (entries.slice(-14).map(([d,x])=>`<div class="v9line"><span>${d}</span><b>${x.weight} kg</b></div>`).join("")||'<div class="empty">Registra tu peso varios días para verla.</div>');
+}
+
+document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));
  if(id==="history")renderHistory();
+ if(id==="stats")renderStatsV9();
+ if(id==="favorites")renderFavoritesV9();
+ if(id==="recipes")renderRecipesV9();
+ if(id==="progress")renderProgressV9();
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 el("copyPrevBtn").onclick=()=>{
@@ -531,24 +525,6 @@ el("exportBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.crea
 el("importBtn").onclick=()=>el("importFile").click();
 el("importFile").onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.days||!x.settings)throw 0;state=x;save();render();toast("Copia importada")}catch(_){toast("Archivo no válido")}};r.readAsText(file)};
 function initSettings(){el("age").value=state.settings.age;el("height").value=state.settings.height;el("baseWeight").value=state.settings.weight;el("activity").value=state.settings.activity;el("deficit").value=state.settings.deficit}
-
-// Navegación principal
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".tabPanel").forEach(x=>x.classList.remove("active"));
-  b.classList.add("active");
-  const panel=el("tab-"+b.dataset.tab);
-  if(panel) panel.classList.add("active");
-  if(b.dataset.tab==="stats") renderStatsPanel();
-  if(b.dataset.tab==="favorites") renderFavoritesPanel();
-  if(b.dataset.tab==="recipes") renderRecipesPanel();
-  if(b.dataset.tab==="progress") renderProgressPanel();
-});
-el("quickFood").onclick=()=>openFood();
-el("quickActivity").onclick=()=>openActivity();
-el("quickStrength").onclick=()=>openStrength();
-el("quickWeight").onclick=()=>el("weight").focus();
-
 initSettings();render();
 })();
 </script>
