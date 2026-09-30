@@ -1,0 +1,9 @@
+{
+  "name": "Mi Progreso Pro",
+  "short_name": "Mi Progreso",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f4f6fa",
+  "theme_color": "#2563eb",
+  "description": "Seguimiento de alimentación, actividad y peso."
+}
