@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Mi Progreso Pro v4</title>
+<title>Mi Progreso Pro v5</title>
 <link rel="manifest" href="manifest.json">
 <style>
 :root{--blue:#2563eb;--blue2:#1d4ed8;--bg:#f4f6fa;--card:#fff;--text:#152033;--muted:#687386;--line:#e5e9ef;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--shadow:0 6px 22px #1018280b}
@@ -17,7 +17,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .hero h1{margin:0;font-size:29px;letter-spacing:-.5px}.hero p{margin:5px 0 0;opacity:.9}
 .content{padding:0 12px;margin-top:-14px}.tabs{display:flex;background:#fff;padding:6px;border-radius:16px;box-shadow:var(--shadow);position:sticky;top:7px;z-index:20;margin-bottom:12px}
 .tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px 6px;border-radius:11px;font-weight:800;font-size:13px}.tabs button.active{background:#eaf0ff;color:var(--blue)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.progress{height:9px;background:#e9edf3;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;width:0;background:var(--blue);border-radius:99px;transition:width .25s}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
 .dateRow{display:flex;gap:9px;align-items:center}.dateRow input{flex:1}.iconBtn{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:11px;font-size:18px}
 input,select{width:100%;border:1px solid #d7dde6;border-radius:11px;padding:11px 12px;background:#fff;color:var(--text);outline:none}
 input:focus,select:focus{border-color:#7aa2ff;box-shadow:0 0 0 3px #2563eb15}
@@ -53,17 +53,22 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 <div style="margin-top:10px"><label>Peso de hoy (kg)</label><input id="weight" type="number" inputmode="decimal" step=".1" placeholder="90"></div>
 </div>
 
+<div class="card" id="progressCard">
+  <div class="row"><div><b>🎯 Progreso de peso</b><div class="hint" id="progressText">Configura un peso objetivo en Ajustes</div></div><b id="progressPercent">—</b></div>
+  <div class="progress"><div id="progressBar"></div></div>
+</div>
+
 <div class="stats">
 <div class="stat"><div class="num" id="foodKcal">0</div><div class="lab">kcal comidas</div></div>
 <div class="stat"><div class="num" id="exerciseKcal">0</div><div class="lab">kcal ejercicio</div></div>
-<div class="stat"><div class="num" id="burnKcal">0</div><div class="lab">gasto estimado</div></div>
+<div class="stat"><div class="num" id="burnKcal">0</div><div class="lab">gasto total estimado</div></div>
 <div class="stat"><div class="num balance" id="balanceKcal">0</div><div class="lab">balance del día</div></div>
 </div>
 
 <div class="card">
 <h2>🍽️ Comida</h2>
 <div class="quickGrid" id="foodButtons"></div>
-<br><button class="secondary" style="width:100%" id="customFoodBtn">＋ Añadir alimento personalizado</button>
+<br><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><button class="secondary" id="copyPrevBtn">↻ Copiar ayer</button><button class="secondary" id="customFoodBtn">＋ Alimento personalizado</button></div>
 </div>
 
 <div class="card">
@@ -76,11 +81,15 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 </div>
 
 <div class="card"><h2>📝 Registro de hoy</h2><div id="log"></div></div>
-<div class="card"><h2>🎯 Objetivos</h2><div class="row"><span>Ingesta orientativa</span><b id="targetText">2.100 kcal</b></div><div class="row"><span>Proteína orientativa</span><b id="proteinText">150–160 g</b></div><p class="hint">El gasto estimado parte de tu metabolismo basal y tu nivel de actividad habitual, y añade el ejercicio registrado. No es lo mismo que las kcal que has quemado haciendo deporte. Es una estimación para orientarte.</p></div>
+<div class="card"><h2>🎯 Objetivos de hoy</h2>
+<div class="row"><span>Ingesta orientativa</span><b id="targetText">2.100 kcal</b></div>
+<div class="row"><span>Proteína</span><b><span id="proteinToday">0</span> / <span id="proteinText">160</span> g</b></div>
+<div class="progress"><div id="proteinBar"></div></div>
+<p class="hint">El gasto total estimado = gasto diario de base + ejercicio registrado. Es una estimación, no una medición exacta.</p></div>
 </section>
 
 <section id="history" class="hide">
-<div class="card"><h2>📊 Resumen</h2><div class="stats"><div class="stat"><div class="num" id="avgFood">0</div><div class="lab">kcal medias/día</div></div><div class="stat"><div class="num" id="avgEx">0</div><div class="lab">kcal ejercicio/día</div></div><div class="stat"><div class="num" id="weekWeight">—</div><div class="lab">peso más reciente</div></div><div class="stat"><div class="num" id="daysCount">0</div><div class="lab">días registrados</div></div></div></div>
+<div class="card"><h2>📊 Resumen</h2><div class="hint" id="trendText">Sin datos suficientes para tendencia</div><div class="stats"><div class="stat"><div class="num" id="avgFood">0</div><div class="lab">kcal medias/día</div></div><div class="stat"><div class="num" id="avgEx">0</div><div class="lab">kcal ejercicio/día</div></div><div class="stat"><div class="num" id="weekWeight">—</div><div class="lab">peso más reciente</div></div><div class="stat"><div class="num" id="daysCount">0</div><div class="lab">días registrados</div></div></div></div>
 <div class="card"><h2>⚖️ Evolución del peso</h2><canvas id="weightChart"></canvas></div>
 <div class="card"><h2>📅 Días registrados</h2><div id="historyList"></div></div>
 </section>
@@ -89,7 +98,9 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 <div class="card"><h2>⚙️ Datos personales</h2><div class="formGrid">
 <div><label>Edad</label><input id="age" type="number"></div><div><label>Altura (cm)</label><input id="height" type="number"></div>
 <div><label>Peso actual/base (kg)</label><input id="baseWeight" type="number" step=".1"></div>
-<div><label>Actividad habitual</label><select id="activity"><option value="1.2">Sedentaria</option><option value="1.35">Ligera</option><option value="1.5">Moderada</option></select><div class="hint" style="margin-top:5px">Esto calcula tu gasto diario de base. El ejercicio se añade aparte.</div></div>
+<div><label>Peso objetivo (kg)</label><input id="goalWeight" type="number" step=".1" placeholder="Ej. 85"></div>
+<div><label>Actividad habitual</label><select id="activity"><option value="1.2">Sedentaria</option><option value="1.35">Ligera</option><option value="1.5">Moderada</option></select><div class="hint" style="margin-top:5px">Es tu gasto diario de base. Para evitar duplicar calorías, el ejercicio que registres se añade aparte.</div></div>
+<div><label>Proteína objetivo (g)</label><input id="proteinGoal" type="number" step="1" placeholder="160"></div>
 <div><label>Déficit objetivo</label><select id="deficit"><option value="200">200 kcal</option><option value="300" selected>300 kcal</option><option value="400">400 kcal</option><option value="500">500 kcal</option></select></div>
 </div><br><button class="primary" id="saveSettings">Guardar ajustes</button><p class="hint">El objetivo se calcula con Mifflin-St Jeor y un factor de actividad. Es orientativo y puede ajustarse según la evolución real.</p></div>
 <div class="card"><h2>💾 Datos</h2><button class="secondary" id="exportBtn">Exportar copia</button> <button class="secondary" id="importBtn">Importar copia</button><input id="importFile" type="file" accept=".json" class="hide"><p class="hint">La información se guarda localmente en este navegador. Exporta una copia si cambias de móvil o navegador.</p></div>
@@ -130,7 +141,7 @@ const EX_DEFAULT=[
 {id:"stairs",name:"Escaleras",emoji:"🏢"},
 {id:"steps",name:"Pasos",emoji:"👟"}
 ];
-const KEY="MI_PROGRESO_PRO_V4";
+const KEY="MI_PROGRESO_PRO_V5";
 let state=load();
 let current=new Date().toISOString().slice(0,10);
 
@@ -138,8 +149,14 @@ function load(){
  try{
   const x=JSON.parse(localStorage.getItem(KEY)||"null");
   if(x&&x.days&&x.settings)return x;
+  const old=JSON.parse(localStorage.getItem("MI_PROGRESO_PRO_V4")||"null");
+  if(old&&old.days&&old.settings){
+    old.settings.goalWeight=old.settings.goalWeight||85;
+    old.settings.proteinGoal=old.settings.proteinGoal||160;
+    return old;
+  }
  }catch(e){}
- return {settings:{age:25,height:185,weight:90,activity:1.2,deficit:300,target:2100},foods:FOOD_DEFAULT,days:{}};
+ return {settings:{age:25,height:185,weight:90,goalWeight:85,proteinGoal:160,activity:1.2,deficit:300,target:2100},foods:FOOD_DEFAULT,days:{}};
 }
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function el(id){return document.getElementById(id)}
@@ -159,15 +176,30 @@ function renderFoodButtons(){
 function render(){
  el("date").value=current;el("weight").value=day().weight||"";
  const foodK=day().food.reduce((s,x)=>s+x.kcal,0), exK=day().exercise.reduce((s,x)=>s+x.kcal,0), burn=baseBurn(weightForDay())+exK;
+ const protein=day().food.reduce((s,x)=>s+(+x.protein||0),0);
  el("foodKcal").textContent=fmt(foodK);el("exerciseKcal").textContent=fmt(exK);el("burnKcal").textContent=fmt(burn);
  const bal=burn-foodK;el("balanceKcal").textContent=(bal>=0?"+":"")+fmt(bal);el("balanceKcal").className="num balance "+(bal>=0?"good":"bad");
  el("targetText").textContent=fmt(target())+" kcal";
- el("proteinText").textContent="150–160 g";
+ const pg=+state.settings.proteinGoal||160;
+ el("proteinToday").textContent=round(protein,0);
+ el("proteinText").textContent=fmt(pg);
+ const pp=Math.min(100,pg?protein/pg*100:0);el("proteinBar").style.width=pp+"%";
+
+ const w=weightForDay(), goal=+state.settings.goalWeight||0, startW=+state.settings.weight||0;
+ if(goal>0 && startW>0 && w>0){
+   const denom=Math.abs(startW-goal)||1;
+   const done=Math.min(100,Math.max(0,(startW-w)/(startW-goal)*100));
+   el("progressPercent").textContent=round(done,0)+"%";
+   el("progressBar").style.width=done+"%";
+   el("progressText").textContent=`${round(w,1)} kg ahora · objetivo ${round(goal,1)} kg · ${round(Math.abs(w-goal),1)} kg restantes`;
+ }else{
+   el("progressPercent").textContent="—";el("progressBar").style.width="0%";
+   el("progressText").textContent="Configura peso actual y objetivo en Ajustes";
+ }
  renderFoodButtons();renderLog();
-}
-function renderLog(){
+}function renderLog(){
  const d=day(), rows=[];
- d.food.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji||"🍽️"} ${x.name}</div><div class="rowMeta">${x.qty}${x.unit} · ${x.protein?round(x.protein,1)+" g proteína":""}</div></div><div class="rowRight"><div class="kcal">${fmt(x.kcal)} kcal</div><button class="del" data-del="food" data-i="${i}">×</button></div></div>`));
+ d.food.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji||"🍽️"} ${x.name}</div><div class="rowMeta">${x.qty}${x.unit}${x.meal?" · "+x.meal:""}${x.protein?" · "+round(x.protein,1)+" g proteína":""}</div></div><div class="rowRight"><div class="kcal">${fmt(x.kcal)} kcal</div><button class="del" data-del="food" data-i="${i}">×</button></div></div>`));
  d.exercise.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji} ${x.name}</div><div class="rowMeta">${x.detail||""}</div></div><div class="rowRight"><div class="kcal">−${fmt(x.kcal)} kcal</div><button class="del" data-del="exercise" data-i="${i}">×</button></div></div>`));
  el("log").innerHTML=rows.join("")||'<div class="empty">Aún no has añadido nada.</div>';
  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();render();});
@@ -183,7 +215,7 @@ function openFood(i){
  const f=state.foods[i], q=f.defaultQty;
  const unit=f.unit;
  openModal(f.emoji+" "+f.name,`
- <div class="formGrid"><div class="full"><label>Cantidad (${unit})</label><input id="foodQty" type="number" inputmode="decimal" min="0" step="${unit==="g"?10:1}" value="${q}"></div></div>
+ <div class="formGrid"><div><label>Cantidad (${unit})</label><input id="foodQty" type="number" inputmode="decimal" min="0" step="${unit==="g"?10:1}" value="${q}"></div><div><label>Momento</label><select id="foodMeal"><option>Desayuno</option><option>Comida</option><option>Merienda</option><option>Cena</option><option>Otro</option></select></div></div>
  <div class="result"><div class="bigResult" id="foodPreview">0 kcal</div><div class="hint" id="foodProtein">0 g proteína</div></div>`,
  `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="add">Añadir</button>`);
  const calc=()=>{
@@ -191,18 +223,18 @@ function openFood(i){
   el("foodPreview").textContent=fmt(kcal)+" kcal";el("foodProtein").textContent=round(protein,1)+" g proteína";
   return {qty,kcal,protein};
  };
- el("foodQty").oninput=calc;calc();el("cancel").onclick=closeModal;el("add").onclick=()=>{let r=calc();if(r.qty<=0)return;day().food.push({name:f.name,emoji:f.emoji,qty:r.qty,unit,kcal:Math.round(r.kcal),protein:round(r.protein,1)});save();closeModal();render();toast("Comida añadida")};
+ el("foodQty").oninput=calc;calc();el("cancel").onclick=closeModal;el("add").onclick=()=>{let r=calc();if(r.qty<=0)return;day().food.push({name:f.name,emoji:f.emoji,qty:r.qty,unit,kcal:Math.round(r.kcal),protein:round(r.protein,1),meal:el("foodMeal").value});save();closeModal();render();toast("Comida añadida")};
 }
 
 function openCustomFood(){
  openModal("＋ Alimento personalizado",`
- <div class="formGrid"><div class="full"><label>Nombre</label><input id="cfName" placeholder="Ej. queso fresco"></div>
+ <div class="formGrid"><div class="full"><label>Nombre</label><input id="cfName" placeholder="Ej. queso fresco"></div><div><label>Momento</label><select id="cfMeal"><option>Desayuno</option><option>Comida</option><option>Merienda</option><option>Cena</option><option>Otro</option></select></div>
  <div><label>Kcal por 100 g</label><input id="cfK" type="number" inputmode="decimal"></div><div><label>Proteína por 100 g</label><input id="cfP" type="number" inputmode="decimal"></div>
  <div class="full"><label>Cantidad que vas a comer (g)</label><input id="cfQ" type="number" inputmode="decimal" value="100"></div></div>
  <div class="result"><div class="bigResult" id="cfPrev">0 kcal</div></div>`,
  `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="add">Añadir</button>`);
  const calc=()=>{let k=+el("cfK").value||0,p=+el("cfP").value||0,q=+el("cfQ").value||0;el("cfPrev").textContent=fmt(k*q/100)+" kcal";return{k,p,q}};
- el("cfK").oninput=calc;el("cfP").oninput=calc;el("cfQ").oninput=calc;el("cancel").onclick=closeModal;el("add").onclick=()=>{let n=el("cfName").value.trim(),r=calc();if(!n||r.k<=0||r.q<=0)return toast("Completa los datos");day().food.push({name:n,emoji:"🍽️",qty:r.q,unit:"g",kcal:Math.round(r.k*r.q/100),protein:round(r.p*r.q/100,1)});save();closeModal();render();toast("Comida añadida")};
+ el("cfK").oninput=calc;el("cfP").oninput=calc;el("cfQ").oninput=calc;el("cancel").onclick=closeModal;el("add").onclick=()=>{let n=el("cfName").value.trim(),r=calc();if(!n||r.k<=0||r.q<=0)return toast("Completa los datos");day().food.push({name:n,emoji:"🍽️",qty:r.q,unit:"g",kcal:Math.round(r.k*r.q/100),protein:round(r.p*r.q/100,1),meal:el("cfMeal").value});save();closeModal();render();toast("Comida añadida")};
 }
 
 function openActivity(){
@@ -323,6 +355,15 @@ function switchTab(id){
  if(id==="history")renderHistory();
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+el("copyPrevBtn").onclick=()=>{
+ const d=new Date(current+"T12:00:00");d.setDate(d.getDate()-1);
+ const prev=d.toISOString().slice(0,10), src=state.days[prev];
+ if(!src || (!src.food.length && !src.exercise.length)) return toast("Ayer no tiene datos");
+ const dest=day();
+ dest.food=JSON.parse(JSON.stringify(src.food||[]));
+ dest.exercise=JSON.parse(JSON.stringify(src.exercise||[]));
+ save();render();toast("Datos de ayer copiados");
+};
 el("prevDay").onclick=()=>shiftDate(-1);el("nextDay").onclick=()=>shiftDate(1);
 el("date").onchange=()=>{current=el("date").value;render()};
 el("weight").oninput=()=>{day().weight=el("weight").value;save();render()};
@@ -334,6 +375,10 @@ function renderHistory(){
  const f=recent.length?recent.reduce((s,[,d])=>s+d.food.reduce((a,x)=>a+x.kcal,0),0)/recent.length:0;
  const e=recent.length?recent.reduce((s,[,d])=>s+d.exercise.reduce((a,x)=>a+x.kcal,0),0)/recent.length:0;
  const weights=entries.filter(([,d])=>d.weight).map(([,d])=>+d.weight);
+ const ws=recent.map(([d,x])=>({d,w:+x.weight||0})).filter(x=>x.w);
+ let trendText="Sin datos suficientes para tendencia";
+ if(ws.length>=2){const first=ws[0].w,last=ws[ws.length-1].w;const diff=last-first;trendText=`Tendencia últimos días: ${diff>0?"+":""}${round(diff,1)} kg`;}
+ el("trendText").textContent=trendText;
  el("avgFood").textContent=fmt(f);el("avgEx").textContent=fmt(e);el("daysCount").textContent=entries.length;el("weekWeight").textContent=weights.length?round(weights[weights.length-1],1)+" kg":"—";
  el("historyList").innerHTML=entries.slice().reverse().map(([date,d])=>{let fk=d.food.reduce((a,x)=>a+x.kcal,0),ek=d.exercise.reduce((a,x)=>a+x.kcal,0);return `<div class="row"><div class="rowMain"><div class="rowTitle">${date}${d.weight?" · "+d.weight+" kg":""}</div><div class="rowMeta">${d.food.length} comidas · ${d.exercise.length} actividades</div></div><div class="rowRight"><div class="kcal">${fmt(fk)} kcal</div><div class="rowMeta">−${fmt(ek)} ejercicio</div></div></div>`}).join("")||'<div class="empty">Todavía no hay días registrados.</div>';
  drawChart(entries);
@@ -344,7 +389,7 @@ function drawChart(entries){
  const vals=p.map(x=>x.w),min=Math.min(...vals)-1,max=Math.max(...vals)+1;ctx.strokeStyle="#e5e9ef";ctx.lineWidth=1;for(let i=0;i<4;i++){let y=20+i*(h-50)/3;ctx.beginPath();ctx.moveTo(35,y);ctx.lineTo(w-15,y);ctx.stroke()}
  ctx.strokeStyle="#2563eb";ctx.lineWidth=3;ctx.beginPath();p.forEach((v,i)=>{let x=35+i*(w-55)/(p.length-1),y=20+(max-v.w)*(h-50)/(max-min);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
 }
-el("saveSettings").onclick=()=>{state.settings.age=+el("age").value||25;state.settings.height=+el("height").value||185;state.settings.weight=+el("baseWeight").value||90;state.settings.activity=+el("activity").value;state.settings.deficit=+el("deficit").value;save();render();toast("Ajustes guardados")};
+el("saveSettings").onclick=()=>{state.settings.age=+el("age").value||25;state.settings.height=+el("height").value||185;state.settings.weight=+el("baseWeight").value||90;state.settings.goalWeight=+el("goalWeight").value||0;state.settings.proteinGoal=+el("proteinGoal").value||160;state.settings.activity=+el("activity").value||1.2;state.settings.deficit=+el("deficit").value||300;save();render();toast("Ajustes guardados")};
 el("exportBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:"application/json"}));a.download="mi-progreso-copia.json";a.click()};
 el("importBtn").onclick=()=>el("importFile").click();
 el("importFile").onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.days||!x.settings)throw 0;state=x;save();render();toast("Copia importada")}catch(_){toast("Archivo no válido")}};r.readAsText(file)};
