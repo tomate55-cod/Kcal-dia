@@ -204,11 +204,11 @@ function load(){
  try{
   const x=JSON.parse(localStorage.getItem(KEY)||"null");
   if(x&&x.days&&x.settings)return x;
-  const old=JSON.parse(localStorage.getItem("MI_PROGRESO_PRO_V4")||"null");
+  const old=JSON.parse(localStorage.getItem("MI_PROGRESO_PRO_V6")||localStorage.getItem("MI_PROGRESO_PRO_V5")||localStorage.getItem("MI_PROGRESO_PRO_V4")||"null");
   if(old&&old.days&&old.settings){
     old.settings.goalWeight=old.settings.goalWeight||85;
     old.settings.proteinGoal=old.settings.proteinGoal||160;
-    return old;
+    old.foods=old.foods||FOOD_DEFAULT; old.settings.goalWeight=old.settings.goalWeight||85; old.settings.proteinGoal=old.settings.proteinGoal||160; return old;
   }
  }catch(e){}
  return {settings:{age:25,height:185,weight:90,goalWeight:85,proteinGoal:160,activity:1.2,deficit:300,target:2100},foods:FOOD_DEFAULT,days:{}};
@@ -281,60 +281,7 @@ function render(){
  d.food.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji||"🍽️"} ${x.name}</div><div class="rowMeta">${x.qty}${x.unit}${x.meal?" · "+x.meal:""}${x.protein?" · "+round(x.protein,1)+" g proteína":""}</div></div><div class="rowRight"><div class="kcal">${fmt(x.kcal)} kcal</div><button class="del" data-del="food" data-i="${i}">×</button></div></div>`));
  d.exercise.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji} ${x.name}</div><div class="rowMeta">${x.detail||""}</div>${x.exercises?`<div class="miniList">${x.exercises.map(e=>`<div>• ${e.ex}: ${e.sets}×${e.sec>0?e.sec+" s":e.reps}</div>`).join("")}</div>`:""}</div><div class="rowRight"><div class="kcal">−${fmt(x.kcal)} kcal</div><button class="del" data-del="exercise" data-i="${i}">×</button></div></div>`));
  el("log").innerHTML=rows.join("")||'<div class="empty">Aún no has añadido nada.</div>';
- document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();
-document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
- document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
- document.querySelectorAll(".tabPanel").forEach(x=>x.classList.remove("active"));
- b.classList.add("active");el("tab-"+b.dataset.tab).classList.add("active");
- if(b.dataset.tab==="stats")renderStatsPanel();
- if(b.dataset.tab==="favorites")renderFavoritesPanel();
- if(b.dataset.tab==="recipes")renderRecipesPanel();
- if(b.dataset.tab==="progress")renderProgressPanel();
-});
-el("quickFood").onclick=()=>openFood();
-el("quickActivity").onclick=()=>openActivity();
-el("quickStrength").onclick=()=>openStrength();
-el("quickWeight").onclick=()=>el("weight").focus();
-
-function renderStatsPanel(){
- const ds=lastNDays(7), rows=ds.map(d=>({d,...getDaySummary(d)}));
- const used=rows.filter(x=>x.kcal||x.protein||x.ex||x.weight);
- if(!used.length){el("statsPanel").innerHTML='<div class="muted">Todavía no hay suficientes datos.</div>';return;}
- const avgK=used.reduce((s,x)=>s+x.kcal,0)/used.length,avgP=used.reduce((s,x)=>s+x.protein,0)/used.length,avgE=used.reduce((s,x)=>s+x.ex,0)/used.length;
- const weights=used.filter(x=>x.weight).map(x=>x.weight);
- const diff=weights.length>1?weights[weights.length-1]-weights[0]:0;
- el("statsPanel").innerHTML=`<div class="kpiGrid"><div class="kpi"><div class="muted">Kcal medias</div><b>${fmt(avgK)}</b></div><div class="kpi"><div class="muted">Proteína media</div><b>${round(avgP,0)} g</b></div><div class="kpi"><div class="muted">Ejercicio medio</div><b>${fmt(avgE)} kcal</b></div><div class="kpi"><div class="muted">Cambio de peso</div><b>${weights.length>1?(diff>0?"+":"")+round(diff,1):"—"} kg</b></div></div><h3>Últimos 7 días</h3>${rows.map(x=>`<div class="foodLine"><span>${new Date(x.d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric"})}</span><span>${fmt(x.kcal)} kcal · ${round(x.protein,0)} g prot. · ${x.weight?round(x.weight,1)+" kg":"—"}</span></div>`).join("")}`;
-}
-function renderFavoritesPanel(){
- const f=getFavorites();
- el("favoritesPanel").innerHTML=f.length?f.map((x,i)=>`<div class="foodLine"><span>⭐ ${x.name} · ${x.qty}${x.unit}</span><span>${fmt(x.kcal)} kcal <button class="secondary favUse" data-i="${i}">Usar</button> <button class="danger favDel" data-i="${i}">×</button></span></div>`).join(""):'<div class="muted">Aún no tienes favoritos. Los añadiremos desde las comidas.</div>';
- el("favoritesPanel").querySelectorAll(".favDel").forEach(b=>b.onclick=()=>{const f=getFavorites();f.splice(+b.dataset.i,1);saveFavorites(f);renderFavoritesPanel();});
- el("favoritesPanel").querySelectorAll(".favUse").forEach(b=>b.onclick=()=>{const x=getFavorites()[+b.dataset.i];day().food.push({...x,meal:"Otro"});save();render();toast("Añadido a hoy");});
-}
-function renderRecipesPanel(){
- const r=getRecipes();
- el("recipesPanel").innerHTML=r.length?r.map((x,i)=>`<div class="recipeCard"><div class="mealHead"><b>${x.name}</b><b>${fmt(x.kcal)} kcal</b></div><div class="muted">${x.ingredients.map(z=>z.name+" "+z.qty+"g").join(" · ")}</div><div style="margin-top:7px"><button class="secondary recipeUse" data-i="${i}">Añadir a hoy</button> <button class="danger recipeDel" data-i="${i}">Eliminar</button></div></div>`).join(""):'<div class="muted">Crea recetas para guardar combinaciones que repites.</div>';
- el("recipesPanel").querySelectorAll(".recipeDel").forEach(b=>b.onclick=()=>{const r=getRecipes();r.splice(+b.dataset.i,1);saveRecipes(r);renderRecipesPanel();});
- el("recipesPanel").querySelectorAll(".recipeUse").forEach(b=>b.onclick=()=>{const x=getRecipes()[+b.dataset.i];day().food.push({name:x.name,emoji:"🍳",qty:1,unit:"ración",kcal:x.kcal,protein:x.protein||0,meal:"Comida"});save();render();toast("Receta añadida");});
-}
-el("newRecipeBtn").onclick=()=>{
- openModal("🍳 Nueva receta",`<div class="formGrid"><div class="full"><label>Nombre</label><input id="rName" placeholder="Ej. arroz con pollo"></div><div><label>Kcal por ración</label><input id="rK" type="number" min="0"></div><div><label>Proteína por ración (g)</label><input id="rP" type="number" min="0"></div><div class="full"><label>Ingredientes (opcional)</label><textarea id="rIng" placeholder="Ej. arroz 70, pollo 200, pimiento 100"></textarea></div></div>`,`<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="saveRecipe">Guardar</button>`);
- el("cancel").onclick=closeModal;
- el("saveRecipe").onclick=()=>{
-  const name=el("rName").value.trim(),k=+el("rK").value||0,p=+el("rP").value||0;
-  if(!name||!k)return toast("Pon nombre y kcal");
-  const ingredients=(el("rIng").value||"").split(",").map(s=>s.trim()).filter(Boolean).map(s=>{const m=s.match(/^(.*?)[ ]+(\d+(?:\.\d+)?)$/);return m?{name:m[1],qty:+m[2]}:{name:s,qty:0};});
-  const r=getRecipes();r.push({name,kcal:Math.round(k),protein:Math.round(p),ingredients});saveRecipes(r);closeModal();renderRecipesPanel();toast("Receta guardada");
- };
-};
-function renderProgressPanel(){
- const weights=daysArray().filter(([d,x])=>x.weight).map(([d,x])=>({d,w:+x.weight}));
- const goal=+state.settings.goalWeight||0,start=+state.settings.weight||0,last=weights.length?weights[weights.length-1].w:start;
- const lost=start&&last?start-last:0;
- el("progressPanel").innerHTML=`<div class="kpiGrid"><div class="kpi"><div class="muted">Peso inicial</div><b>${start?round(start,1):"—"} kg</b></div><div class="kpi"><div class="muted">Peso actual</div><b>${last?round(last,1):"—"} kg</b></div><div class="kpi"><div class="muted">Cambio</div><b>${start?(lost>0?"-":"+")+Math.abs(round(lost,1)):"—"} kg</b></div><div class="kpi"><div class="muted">Objetivo</div><b>${goal?round(goal,1):"—"} kg</b></div></div><h3>⚖️ Tendencia</h3><div>${weights.slice(-14).map(x=>`<div class="foodLine"><span>${new Date(x.d+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"})}</span><b>${round(x.w,1)} kg</b></div>`).join("")||'<div class="muted">Registra tu peso para empezar la tendencia.</div>'}</div><h3>🔥 Racha</h3><div class="streak">${streakDays()} días</div>`;
-}
-
-render();});
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();render();});
 }
 
 function openModal(title,body,buttons){
@@ -584,6 +531,24 @@ el("exportBtn").onclick=()=>{const a=document.createElement("a");a.href=URL.crea
 el("importBtn").onclick=()=>el("importFile").click();
 el("importFile").onchange=e=>{let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.days||!x.settings)throw 0;state=x;save();render();toast("Copia importada")}catch(_){toast("Archivo no válido")}};r.readAsText(file)};
 function initSettings(){el("age").value=state.settings.age;el("height").value=state.settings.height;el("baseWeight").value=state.settings.weight;el("activity").value=state.settings.activity;el("deficit").value=state.settings.deficit}
+
+// Navegación principal
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tabPanel").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  const panel=el("tab-"+b.dataset.tab);
+  if(panel) panel.classList.add("active");
+  if(b.dataset.tab==="stats") renderStatsPanel();
+  if(b.dataset.tab==="favorites") renderFavoritesPanel();
+  if(b.dataset.tab==="recipes") renderRecipesPanel();
+  if(b.dataset.tab==="progress") renderProgressPanel();
+});
+el("quickFood").onclick=()=>openFood();
+el("quickActivity").onclick=()=>openActivity();
+el("quickStrength").onclick=()=>openStrength();
+el("quickWeight").onclick=()=>el("weight").focus();
+
 initSettings();render();
 })();
 </script>
