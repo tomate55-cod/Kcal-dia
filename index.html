@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Mi Progreso Pro v5</title>
+<title>Mi Progreso Pro v7</title>
 <link rel="manifest" href="manifest.json">
 <style>
 :root{--blue:#2563eb;--blue2:#1d4ed8;--bg:#f4f6fa;--card:#fff;--text:#152033;--muted:#687386;--line:#e5e9ef;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--shadow:0 6px 22px #1018280b}
@@ -17,7 +17,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .hero h1{margin:0;font-size:29px;letter-spacing:-.5px}.hero p{margin:5px 0 0;opacity:.9}
 .content{padding:0 12px;margin-top:-14px}.tabs{display:flex;background:#fff;padding:6px;border-radius:16px;box-shadow:var(--shadow);position:sticky;top:7px;z-index:20;margin-bottom:12px}
 .tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px 6px;border-radius:11px;font-weight:800;font-size:13px}.tabs button.active{background:#eaf0ff;color:var(--blue)}
-.progress{height:9px;background:#e9edf3;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;width:0;background:var(--blue);border-radius:99px;transition:width .25s}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.miniList{margin-top:7px;padding-left:4px;line-height:1.5;font-size:.9rem}.progress{height:9px;background:#e9edf3;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;width:0;background:var(--blue);border-radius:99px;transition:width .25s}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
 .dateRow{display:flex;gap:9px;align-items:center}.dateRow input{flex:1}.iconBtn{width:42px;height:42px;border:1px solid var(--line);background:#fff;border-radius:11px;font-size:18px}
 input,select{width:100%;border:1px solid #d7dde6;border-radius:11px;padding:11px 12px;background:#fff;color:var(--text);outline:none}
 input:focus,select:focus{border-color:#7aa2ff;box-shadow:0 0 0 3px #2563eb15}
@@ -37,9 +37,59 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 .hide{display:none!important}.footerNote{font-size:11px;color:var(--muted);text-align:center;margin:16px}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#172033;color:#fff;padding:11px 15px;border-radius:12px;font-size:13px;font-weight:700;z-index:200;box-shadow:0 8px 30px #0003}
 @media(min-width:700px){.modalBack{align-items:center}.modal{border-radius:22px}.quickGrid{grid-template-columns:repeat(3,1fr)}}
+
+.tabs{position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow:auto;padding:8px 10px;background:var(--bg,#f6f7fb);border-bottom:1px solid #e7e9ef}
+.tab{border:0;background:#fff;padding:9px 12px;border-radius:12px;white-space:nowrap;font-weight:700}
+.tab.active{background:#111827;color:#fff}
+.tabPanel{display:none}.tabPanel.active{display:block}
+.quickActions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.quickActions button{padding:11px 5px;border:0;border-radius:12px;background:#fff;font-weight:700}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.mealCard{border:1px solid #e6e8ee;border-radius:14px;padding:12px;margin:8px 0;background:#fff}
+.mealHead{display:flex;justify-content:space-between;align-items:center}
+.foodLine{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid #f0f1f4;font-size:.92rem}
+.kpiGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi{padding:12px;border-radius:14px;background:#fff;border:1px solid #e6e8ee}
+.kpi b{font-size:1.15rem}.muted{color:#68707d;font-size:.88rem}
+.streak{font-size:2rem;font-weight:800}
+.recipeCard{border:1px solid #e6e8ee;border-radius:14px;padding:12px;margin:8px 0}
+@media(min-width:700px){.quickActions{grid-template-columns:repeat(4,160px)}.kpiGrid{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
+<nav class="tabs" id="mainTabs">
+ <button class="tab active" data-tab="today">🏠 Hoy</button>
+ <button class="tab" data-tab="stats">📊 Estadísticas</button>
+ <button class="tab" data-tab="favorites">⭐ Favoritos</button>
+ <button class="tab" data-tab="recipes">🍳 Recetas</button>
+ <button class="tab" data-tab="progress">🏆 Progreso</button>
+</nav>
+
+<section class="tabPanel active" id="tab-today">
+<div class="card">
+ <div class="sectionTitle"><div><h2 style="margin:0">Hoy</h2><div class="muted" id="todaySubtitle"></div></div><div class="streak" id="todayStreak">🔥 0</div></div>
+ <div class="quickActions">
+  <button id="quickFood">🍽️<br>Comida</button>
+  <button id="quickActivity">🚶<br>Actividad</button>
+  <button id="quickStrength">💪<br>Fuerza</button>
+  <button id="quickWeight">⚖️<br>Peso</button>
+ </div>
+</div>
+
+<div class="card">
+ <div class="sectionTitle"><h2 style="margin:0">🍽️ Comidas</h2><span class="muted" id="todayFoodSummary"></span></div>
+ <div id="mealsDashboard"></div>
+</div>
+
+<div class="card">
+ <div class="sectionTitle"><h2 style="margin:0">🏃 Actividad</h2><span class="muted" id="todayActivitySummary"></span></div>
+ <div id="activityDashboard"></div>
+</div>
+
+<div class="card">
+ <div class="sectionTitle"><h2 style="margin:0">📌 Resumen</h2></div>
+ <div class="kpiGrid" id="todayKpis"></div>
+</div>
 <div class="app">
 <header class="hero"><h1>💪 Mi Progreso Pro</h1><p>Comida · actividad · peso · evolución</p></header>
 <div class="content">
@@ -73,10 +123,10 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 
 <div class="card">
 <h2>🏃 Actividad del día</h2>
-<p class="hint">Registra aquí toda tu actividad. Los pasos sirven como referencia diaria; para evitar contar dos veces lo mismo, no se suman como ejercicio extra si ya has registrado una caminata.</p>
+<p class="hint">Registra aquí toda tu actividad. Los pasos sirven como referencia diaria; para evitar contar dos veces lo mismo, no se suman como ejercicio extra si ya has registrado una caminata. Las kcal del ejercicio son aproximadas.</p>
 <div class="quickGrid">
 <button class="quick" id="activityBtn"><b>🚶 Actividad diaria</b><small>Caminar · pasos · escaleras</small></button>
-<button class="quick" id="strengthBtn"><b>💪 Fuerza</b><small>Tiempo + intensidad</small></button>
+<button class="quick" id="strengthBtn"><b>💪 Fuerza</b><small>Ejercicios + series + repeticiones</small></button>
 </div>
 </div>
 
@@ -110,6 +160,11 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 
 <div id="modalRoot"></div><div id="toast" class="toast hide"></div>
 
+</section>
+<section class="tabPanel" id="tab-stats"><div class="card"><h2>📊 Estadísticas</h2><div id="statsPanel"></div></div></section>
+<section class="tabPanel" id="tab-favorites"><div class="card"><h2>⭐ Favoritos</h2><div id="favoritesPanel"></div></div></section>
+<section class="tabPanel" id="tab-recipes"><div class="card"><h2>🍳 Recetas</h2><div id="recipesPanel"></div><button class="primary" id="newRecipeBtn">＋ Nueva receta</button></div></section>
+<section class="tabPanel" id="tab-progress"><div class="card"><h2>🏆 Progreso</h2><div id="progressPanel"></div></div></section>
 <script>
 (function(){
 "use strict";
@@ -141,7 +196,7 @@ const EX_DEFAULT=[
 {id:"stairs",name:"Escaleras",emoji:"🏢"},
 {id:"steps",name:"Pasos",emoji:"👟"}
 ];
-const KEY="MI_PROGRESO_PRO_V5";
+const KEY="MI_PROGRESO_PRO_V7";
 let state=load();
 let current=new Date().toISOString().slice(0,10);
 
@@ -173,7 +228,31 @@ function renderFoodButtons(){
  el("foodButtons").innerHTML=state.foods.map((f,i)=>`<button class="quick" data-food="${i}"><b>${f.emoji} ${f.name}</b><small>Por defecto ${f.defaultQty}${f.unit} · ${f.perUnit?f.kcal100:f.kcal100+"/100g"} kcal</small></button>`).join("");
  document.querySelectorAll("[data-food]").forEach(b=>b.onclick=()=>openFood(+b.dataset.food));
 }
+
+function renderTodayDashboard(){
+ const names={Desayuno:"🌅 Desayuno",Comida:"🍽️ Comida",Merienda:"☕ Merienda",Cena:"🌙 Cena",Otro:"📦 Otro"};
+ const meals=MEALS.map(m=>{
+  const items=mealData(m), kcal=items.reduce((s,x)=>s+(+x.kcal||0),0);
+  return `<div class="mealCard"><div class="mealHead"><b>${names[m]}</b><b>${fmt(kcal)} kcal</b></div>${items.length?items.map(x=>`<div class="foodLine"><span>${x.emoji||"🍽️"} ${x.name} · ${x.qty}${x.unit}</span><span>${fmt(x.kcal)}</span></div>`).join(""):`<div class="muted" style="padding-top:7px">Sin alimentos · <button class="secondary mealAdd" data-meal="${m}">＋ Añadir</button></div>`}</div>`;
+ }).join("");
+ el("mealsDashboard").innerHTML=meals;
+ el("mealsDashboard").querySelectorAll(".mealAdd").forEach(b=>b.onclick=()=>openFoodForMeal(b.dataset.meal));
+
+ const ex=day().exercise||[];
+ el("activityDashboard").innerHTML=ex.length?ex.map(x=>`<div class="foodLine"><span>${x.emoji||"🏃"} <b>${x.name}</b><br><span class="muted">${x.detail||""}</span></span><span>${fmt(x.kcal||0)} kcal</span></div>`).join(""):`<div class="muted">Sin actividad registrada hoy.</div>`;
+ const foodK=day().food.reduce((s,x)=>s+(+x.kcal||0),0), protein=day().food.reduce((s,x)=>s+(+x.protein||0),0), exK=ex.reduce((s,x)=>s+(+x.kcal||0),0);
+ el("todayFoodSummary").textContent=`${fmt(foodK)} kcal`;
+ el("todayActivitySummary").textContent=`${fmt(exK)} kcal estimadas`;
+ el("todaySubtitle").textContent=new Date(current+"T12:00:00").toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"});
+ el("todayStreak").textContent=`🔥 ${streakDays()}`;
+ el("todayKpis").innerHTML=`<div class="kpi"><div class="muted">Calorías</div><b>${fmt(foodK)}</b><div class="muted">/ ${fmt(target())} kcal</div></div><div class="kpi"><div class="muted">Proteína</div><b>${round(protein,0)} g</b><div class="muted">/ ${fmt(state.settings.proteinGoal||160)} g</div></div><div class="kpi"><div class="muted">Ejercicio</div><b>${fmt(exK)}</b><div class="muted">kcal estimadas</div></div><div class="kpi"><div class="muted">Peso</div><b>${day().weight?round(day().weight,1):"—"}</b><div class="muted">${day().weight?"kg":"sin registrar"}</div></div>`;
+}
+function openFoodForMeal(meal){
+ openFood();
+ setTimeout(()=>{if(el("foodMeal"))el("foodMeal").value=meal;},0);
+}
 function render(){
+ renderTodayDashboard();
  el("date").value=current;el("weight").value=day().weight||"";
  const foodK=day().food.reduce((s,x)=>s+x.kcal,0), exK=day().exercise.reduce((s,x)=>s+x.kcal,0), burn=baseBurn(weightForDay())+exK;
  const protein=day().food.reduce((s,x)=>s+(+x.protein||0),0);
@@ -200,9 +279,62 @@ function render(){
 }function renderLog(){
  const d=day(), rows=[];
  d.food.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji||"🍽️"} ${x.name}</div><div class="rowMeta">${x.qty}${x.unit}${x.meal?" · "+x.meal:""}${x.protein?" · "+round(x.protein,1)+" g proteína":""}</div></div><div class="rowRight"><div class="kcal">${fmt(x.kcal)} kcal</div><button class="del" data-del="food" data-i="${i}">×</button></div></div>`));
- d.exercise.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji} ${x.name}</div><div class="rowMeta">${x.detail||""}</div></div><div class="rowRight"><div class="kcal">−${fmt(x.kcal)} kcal</div><button class="del" data-del="exercise" data-i="${i}">×</button></div></div>`));
+ d.exercise.forEach((x,i)=>rows.push(`<div class="row"><div class="rowMain"><div class="rowTitle">${x.emoji} ${x.name}</div><div class="rowMeta">${x.detail||""}</div>${x.exercises?`<div class="miniList">${x.exercises.map(e=>`<div>• ${e.ex}: ${e.sets}×${e.sec>0?e.sec+" s":e.reps}</div>`).join("")}</div>`:""}</div><div class="rowRight"><div class="kcal">−${fmt(x.kcal)} kcal</div><button class="del" data-del="exercise" data-i="${i}">×</button></div></div>`));
  el("log").innerHTML=rows.join("")||'<div class="empty">Aún no has añadido nada.</div>';
- document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();render();});
+ document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{day()[b.dataset.del].splice(+b.dataset.i,1);save();
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+ document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+ document.querySelectorAll(".tabPanel").forEach(x=>x.classList.remove("active"));
+ b.classList.add("active");el("tab-"+b.dataset.tab).classList.add("active");
+ if(b.dataset.tab==="stats")renderStatsPanel();
+ if(b.dataset.tab==="favorites")renderFavoritesPanel();
+ if(b.dataset.tab==="recipes")renderRecipesPanel();
+ if(b.dataset.tab==="progress")renderProgressPanel();
+});
+el("quickFood").onclick=()=>openFood();
+el("quickActivity").onclick=()=>openActivity();
+el("quickStrength").onclick=()=>openStrength();
+el("quickWeight").onclick=()=>el("weight").focus();
+
+function renderStatsPanel(){
+ const ds=lastNDays(7), rows=ds.map(d=>({d,...getDaySummary(d)}));
+ const used=rows.filter(x=>x.kcal||x.protein||x.ex||x.weight);
+ if(!used.length){el("statsPanel").innerHTML='<div class="muted">Todavía no hay suficientes datos.</div>';return;}
+ const avgK=used.reduce((s,x)=>s+x.kcal,0)/used.length,avgP=used.reduce((s,x)=>s+x.protein,0)/used.length,avgE=used.reduce((s,x)=>s+x.ex,0)/used.length;
+ const weights=used.filter(x=>x.weight).map(x=>x.weight);
+ const diff=weights.length>1?weights[weights.length-1]-weights[0]:0;
+ el("statsPanel").innerHTML=`<div class="kpiGrid"><div class="kpi"><div class="muted">Kcal medias</div><b>${fmt(avgK)}</b></div><div class="kpi"><div class="muted">Proteína media</div><b>${round(avgP,0)} g</b></div><div class="kpi"><div class="muted">Ejercicio medio</div><b>${fmt(avgE)} kcal</b></div><div class="kpi"><div class="muted">Cambio de peso</div><b>${weights.length>1?(diff>0?"+":"")+round(diff,1):"—"} kg</b></div></div><h3>Últimos 7 días</h3>${rows.map(x=>`<div class="foodLine"><span>${new Date(x.d+"T12:00:00").toLocaleDateString("es-ES",{weekday:"short",day:"numeric"})}</span><span>${fmt(x.kcal)} kcal · ${round(x.protein,0)} g prot. · ${x.weight?round(x.weight,1)+" kg":"—"}</span></div>`).join("")}`;
+}
+function renderFavoritesPanel(){
+ const f=getFavorites();
+ el("favoritesPanel").innerHTML=f.length?f.map((x,i)=>`<div class="foodLine"><span>⭐ ${x.name} · ${x.qty}${x.unit}</span><span>${fmt(x.kcal)} kcal <button class="secondary favUse" data-i="${i}">Usar</button> <button class="danger favDel" data-i="${i}">×</button></span></div>`).join(""):'<div class="muted">Aún no tienes favoritos. Los añadiremos desde las comidas.</div>';
+ el("favoritesPanel").querySelectorAll(".favDel").forEach(b=>b.onclick=()=>{const f=getFavorites();f.splice(+b.dataset.i,1);saveFavorites(f);renderFavoritesPanel();});
+ el("favoritesPanel").querySelectorAll(".favUse").forEach(b=>b.onclick=()=>{const x=getFavorites()[+b.dataset.i];day().food.push({...x,meal:"Otro"});save();render();toast("Añadido a hoy");});
+}
+function renderRecipesPanel(){
+ const r=getRecipes();
+ el("recipesPanel").innerHTML=r.length?r.map((x,i)=>`<div class="recipeCard"><div class="mealHead"><b>${x.name}</b><b>${fmt(x.kcal)} kcal</b></div><div class="muted">${x.ingredients.map(z=>z.name+" "+z.qty+"g").join(" · ")}</div><div style="margin-top:7px"><button class="secondary recipeUse" data-i="${i}">Añadir a hoy</button> <button class="danger recipeDel" data-i="${i}">Eliminar</button></div></div>`).join(""):'<div class="muted">Crea recetas para guardar combinaciones que repites.</div>';
+ el("recipesPanel").querySelectorAll(".recipeDel").forEach(b=>b.onclick=()=>{const r=getRecipes();r.splice(+b.dataset.i,1);saveRecipes(r);renderRecipesPanel();});
+ el("recipesPanel").querySelectorAll(".recipeUse").forEach(b=>b.onclick=()=>{const x=getRecipes()[+b.dataset.i];day().food.push({name:x.name,emoji:"🍳",qty:1,unit:"ración",kcal:x.kcal,protein:x.protein||0,meal:"Comida"});save();render();toast("Receta añadida");});
+}
+el("newRecipeBtn").onclick=()=>{
+ openModal("🍳 Nueva receta",`<div class="formGrid"><div class="full"><label>Nombre</label><input id="rName" placeholder="Ej. arroz con pollo"></div><div><label>Kcal por ración</label><input id="rK" type="number" min="0"></div><div><label>Proteína por ración (g)</label><input id="rP" type="number" min="0"></div><div class="full"><label>Ingredientes (opcional)</label><textarea id="rIng" placeholder="Ej. arroz 70, pollo 200, pimiento 100"></textarea></div></div>`,`<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="saveRecipe">Guardar</button>`);
+ el("cancel").onclick=closeModal;
+ el("saveRecipe").onclick=()=>{
+  const name=el("rName").value.trim(),k=+el("rK").value||0,p=+el("rP").value||0;
+  if(!name||!k)return toast("Pon nombre y kcal");
+  const ingredients=(el("rIng").value||"").split(",").map(s=>s.trim()).filter(Boolean).map(s=>{const m=s.match(/^(.*?)[ ]+(\d+(?:\.\d+)?)$/);return m?{name:m[1],qty:+m[2]}:{name:s,qty:0};});
+  const r=getRecipes();r.push({name,kcal:Math.round(k),protein:Math.round(p),ingredients});saveRecipes(r);closeModal();renderRecipesPanel();toast("Receta guardada");
+ };
+};
+function renderProgressPanel(){
+ const weights=daysArray().filter(([d,x])=>x.weight).map(([d,x])=>({d,w:+x.weight}));
+ const goal=+state.settings.goalWeight||0,start=+state.settings.weight||0,last=weights.length?weights[weights.length-1].w:start;
+ const lost=start&&last?start-last:0;
+ el("progressPanel").innerHTML=`<div class="kpiGrid"><div class="kpi"><div class="muted">Peso inicial</div><b>${start?round(start,1):"—"} kg</b></div><div class="kpi"><div class="muted">Peso actual</div><b>${last?round(last,1):"—"} kg</b></div><div class="kpi"><div class="muted">Cambio</div><b>${start?(lost>0?"-":"+")+Math.abs(round(lost,1)):"—"} kg</b></div><div class="kpi"><div class="muted">Objetivo</div><b>${goal?round(goal,1):"—"} kg</b></div></div><h3>⚖️ Tendencia</h3><div>${weights.slice(-14).map(x=>`<div class="foodLine"><span>${new Date(x.d+"T12:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"})}</span><b>${round(x.w,1)} kg</b></div>`).join("")||'<div class="muted">Registra tu peso para empezar la tendencia.</div>'}</div><h3>🔥 Racha</h3><div class="streak">${streakDays()} días</div>`;
+}
+
+render();});
 }
 
 function openModal(title,body,buttons){
@@ -330,14 +462,72 @@ function openActivity(){
 }
 
 function openStrength(){
+ const EX=[
+  ["Flexiones","💪"],["Sentadillas","🦵"],["Zancadas","🦵"],["Puente de glúteos","🍑"],
+  ["Remo con mochila","🎒"],["Peso muerto con mochila","🏋️"],["Plancha","🧱"],["Plancha lateral","🧱"],
+  ["Press de hombros","🏋️"],["Curl de bíceps","💪"],["Otro","➕"]
+ ];
  openModal("💪 Entrenamiento de fuerza",`
- <div><label>Tiempo</label><div class="pills"><button class="pill" data-m="20">20 min</button><button class="pill active" data-m="30">30 min</button><button class="pill" data-m="45">45 min</button><button class="pill" data-m="60">60 min</button></div></div>
- <br><label>Intensidad</label><select id="stInt"><option value="3.5">Suave</option><option value="5" selected>Normal</option><option value="6">Intensa</option></select>
- <div class="result"><div class="bigResult" id="stPrev">0 kcal</div></div>`,
- `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="add">Añadir</button>`);
- let mins=30;const calc=()=>{let met=+el("stInt").value,k=met*3.5*weightForDay()/200*mins;el("stPrev").textContent=fmt(k)+" kcal";return{k}};document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mins=+b.dataset.m;document.querySelectorAll("[data-m]").forEach(x=>x.classList.remove("active"));b.classList.add("active");calc()});el("stInt").onchange=calc;calc();
- el("cancel").onclick=closeModal;el("add").onclick=()=>{let r=calc();day().exercise.push({name:"Fuerza",emoji:"💪",kcal:Math.round(r.k),detail:`${mins} min · ${el("stInt").selectedOptions[0].text}`});save();closeModal();render();toast("Entrenamiento añadido")};
+ <div class="hint">Registra cada ejercicio por separado. En ejercicios por repeticiones usa series y repeticiones; en planchas puedes usar segundos.</div>
+ <div id="strengthRows"></div>
+ <button class="secondary" id="addStrengthRow" style="width:100%;margin-top:10px">＋ Añadir ejercicio</button>
+ <div class="result" style="margin-top:12px"><div class="bigResult" id="strengthTotal">0 min</div><div class="hint">Tiempo total introducido</div></div>`,
+ `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="saveStrength">Guardar entrenamiento</button>`);
+
+ const rows=el("strengthRows");
+ let data=[{ex:"Flexiones",sets:2,reps:10,sec:0}];
+
+ function rowHtml(i,x){
+  return `<div class="card" style="margin:8px 0;padding:12px" data-row="${i}">
+   <div class="formGrid">
+    <div><label>Ejercicio</label><select class="sx">${EX.map(([n])=>`<option ${n===x.ex?"selected":""}>${n}</option>`).join("")}</select></div>
+    <div><label>Series</label><input class="ss" type="number" min="1" step="1" value="${x.sets||1}"></div>
+    <div><label>Repeticiones / serie</label><input class="sr" type="number" min="1" step="1" value="${x.reps||10}"></div>
+    <div><label>Segundos (si aplica)</label><input class="st" type="number" min="0" step="5" value="${x.sec||0}"></div>
+   </div>
+   <button class="danger removeRow" style="margin-top:8px">Eliminar</button>
+  </div>`;
+ }
+
+ function renderRows(){
+  rows.innerHTML=data.map((x,i)=>rowHtml(i,x)).join("");
+  rows.querySelectorAll(".removeRow").forEach((b,i)=>b.onclick=()=>{data.splice(i,1);if(!data.length)data.push({ex:"Flexiones",sets:1,reps:10,sec:0});renderRows();calc();});
+  rows.querySelectorAll("input,select").forEach((node,i)=>{
+    node.oninput=()=>{
+      const r=node.closest("[data-row]"), idx=+r.dataset.row;
+      data[idx]={
+       ex:r.querySelector(".sx").value,
+       sets:+r.querySelector(".ss").value||1,
+       reps:+r.querySelector(".sr").value||0,
+       sec:+r.querySelector(".st").value||0
+      };
+      calc();
+    };
+  });
+ }
+ function calc(){
+  let sec=0;
+  data.forEach(x=>sec += x.sec>0 ? x.sec*x.sets : Math.max(20,x.sets*x.reps*3));
+  el("strengthTotal").textContent=round(sec/60,0)+" min";
+ }
+ el("addStrengthRow").onclick=()=>{data.push({ex:"Sentadillas",sets:2,reps:10,sec:0});renderRows();calc();};
+ renderRows();calc();
+ el("cancel").onclick=closeModal;
+ el("saveStrength").onclick=()=>{
+  const clean=data.filter(x=>x.ex);
+  if(!clean.length)return toast("Añade algún ejercicio");
+  const totalSec=clean.reduce((s,x)=>s+(x.sec>0?x.sec*x.sets:Math.max(20,x.sets*x.reps*3)),0);
+  const totalK=Math.round((3.5*3.5*weightForDay()/200)*(totalSec/60));
+  day().exercise.push({
+    name:"Fuerza",emoji:"💪",kcal:totalK,
+    detail:clean.map(x=>`${x.ex}: ${x.sets}×${x.sec>0?x.sec+" s":x.reps}`).join(" · "),
+    exercises:clean
+  });
+  save();closeModal();render();toast("Entrenamiento guardado");
+ };
 }
+
+
 function openStairs(){
  openModal("🏢 Escaleras",`<div><label>Pisos subidos</label><input id="fl" type="number" inputmode="numeric" min="1" value="10"></div><div class="result"><div class="bigResult" id="flPrev">0 kcal</div><div class="hint">Estimación basada en tu peso y una altura aproximada de 3 m por piso.</div></div>`,
  `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="add">Añadir</button>`);
