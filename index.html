@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Mi Progreso Pro</title>
+<title>Mi Progreso Pro v4</title>
 <link rel="manifest" href="manifest.json">
 <style>
 :root{--blue:#2563eb;--blue2:#1d4ed8;--bg:#f4f6fa;--card:#fff;--text:#152033;--muted:#687386;--line:#e5e9ef;--green:#16a34a;--red:#dc2626;--orange:#ea580c;--shadow:0 6px 22px #1018280b}
@@ -67,17 +67,16 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 </div>
 
 <div class="card">
-<h2>🏃 Actividad</h2>
+<h2>🏃 Actividad del día</h2>
+<p class="hint">Registra aquí toda tu actividad. Los pasos sirven como referencia diaria; para evitar contar dos veces lo mismo, no se suman como ejercicio extra si ya has registrado una caminata.</p>
 <div class="quickGrid">
-<button class="quick" id="walkBtn"><b>🚶 Caminar</b><small>Distancia + tiempo</small></button>
+<button class="quick" id="activityBtn"><b>🚶 Actividad diaria</b><small>Caminar · pasos · escaleras</small></button>
 <button class="quick" id="strengthBtn"><b>💪 Fuerza</b><small>Tiempo + intensidad</small></button>
-<button class="quick" id="stairsBtn"><b>🏢 Escaleras</b><small>Pisos subidos</small></button>
-<button class="quick" id="stepsBtn"><b>👟 Pasos</b><small>Pasos del día</small></button>
 </div>
 </div>
 
 <div class="card"><h2>📝 Registro de hoy</h2><div id="log"></div></div>
-<div class="card"><h2>🎯 Objetivos</h2><div class="row"><span>Ingesta orientativa</span><b id="targetText">2.100 kcal</b></div><div class="row"><span>Proteína orientativa</span><b id="proteinText">150–160 g</b></div><p class="hint">Las calorías de ejercicio son estimaciones. Sirven para comparar días y ver tendencias, no para medir exactamente el gasto.</p></div>
+<div class="card"><h2>🎯 Objetivos</h2><div class="row"><span>Ingesta orientativa</span><b id="targetText">2.100 kcal</b></div><div class="row"><span>Proteína orientativa</span><b id="proteinText">150–160 g</b></div><p class="hint">El gasto estimado parte de tu metabolismo basal y tu nivel de actividad habitual, y añade el ejercicio registrado. No es lo mismo que las kcal que has quemado haciendo deporte. Es una estimación para orientarte.</p></div>
 </section>
 
 <section id="history" class="hide">
@@ -90,7 +89,7 @@ canvas{display:block;width:100%;height:230px;border:1px solid var(--line);border
 <div class="card"><h2>⚙️ Datos personales</h2><div class="formGrid">
 <div><label>Edad</label><input id="age" type="number"></div><div><label>Altura (cm)</label><input id="height" type="number"></div>
 <div><label>Peso actual/base (kg)</label><input id="baseWeight" type="number" step=".1"></div>
-<div><label>Actividad habitual</label><select id="activity"><option value="1.2">Sedentaria</option><option value="1.35">Ligera</option><option value="1.5">Moderada</option></select></div>
+<div><label>Actividad habitual</label><select id="activity"><option value="1.2">Sedentaria</option><option value="1.35">Ligera</option><option value="1.5">Moderada</option></select><div class="hint" style="margin-top:5px">Esto calcula tu gasto diario de base. El ejercicio se añade aparte.</div></div>
 <div><label>Déficit objetivo</label><select id="deficit"><option value="200">200 kcal</option><option value="300" selected>300 kcal</option><option value="400">400 kcal</option><option value="500">500 kcal</option></select></div>
 </div><br><button class="primary" id="saveSettings">Guardar ajustes</button><p class="hint">El objetivo se calcula con Mifflin-St Jeor y un factor de actividad. Es orientativo y puede ajustarse según la evolución real.</p></div>
 <div class="card"><h2>💾 Datos</h2><button class="secondary" id="exportBtn">Exportar copia</button> <button class="secondary" id="importBtn">Importar copia</button><input id="importFile" type="file" accept=".json" class="hide"><p class="hint">La información se guarda localmente en este navegador. Exporta una copia si cambias de móvil o navegador.</p></div>
@@ -131,7 +130,7 @@ const EX_DEFAULT=[
 {id:"stairs",name:"Escaleras",emoji:"🏢"},
 {id:"steps",name:"Pasos",emoji:"👟"}
 ];
-const KEY="MI_PROGRESO_PRO_V3";
+const KEY="MI_PROGRESO_PRO_V4";
 let state=load();
 let current=new Date().toISOString().slice(0,10);
 
@@ -206,16 +205,98 @@ function openCustomFood(){
  el("cfK").oninput=calc;el("cfP").oninput=calc;el("cfQ").oninput=calc;el("cancel").onclick=closeModal;el("add").onclick=()=>{let n=el("cfName").value.trim(),r=calc();if(!n||r.k<=0||r.q<=0)return toast("Completa los datos");day().food.push({name:n,emoji:"🍽️",qty:r.q,unit:"g",kcal:Math.round(r.k*r.q/100),protein:round(r.p*r.q/100,1)});save();closeModal();render();toast("Comida añadida")};
 }
 
-function openWalk(){
- openModal("🚶 Caminar",`
- <div class="formGrid"><div><label>Distancia (km)</label><input id="wkKm" type="number" inputmode="decimal" step=".01" value="3"></div><div><label>Tiempo (min)</label><input id="wkMin" type="number" inputmode="decimal" step="1" value="40"></div></div>
- <div class="pills" style="margin-top:10px"><button class="pill" data-w="30">30 min</button><button class="pill" data-w="45">45 min</button><button class="pill" data-w="60">60 min</button><button class="pill" data-w="90">90 min</button></div>
- <div class="result"><div class="bigResult" id="wkPrev">0 kcal</div><div class="hint" id="wkDetail"></div></div>`,
- `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="add">Añadir</button>`);
- const calc=()=>{let km=+el("wkKm").value||0,min=+el("wkMin").value||0,speed=min?km/(min/60):0;let met=speed<3.2?2.8:speed<4?3.0:speed<5?3.5:speed<6.5?4.3:5.0;let kcal=met*3.5*weightForDay()/200*min;el("wkPrev").textContent=fmt(kcal)+" kcal";el("wkDetail").textContent=(speed?round(speed,1)+" km/h · ":"")+min+" min · "+km+" km";return{km,min,kcal}};
- el("wkKm").oninput=calc;el("wkMin").oninput=calc;document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{el("wkMin").value=b.dataset.w;calc()});calc();
- el("cancel").onclick=closeModal;el("add").onclick=()=>{let r=calc();if(r.km<=0||r.min<=0)return toast("Pon distancia y tiempo");day().exercise.push({name:"Caminar",emoji:"🚶",kcal:Math.round(r.kcal),detail:`${r.km} km · ${r.min} min`});save();closeModal();render();toast("Actividad añadida")};
+function openActivity(){
+ openModal("🏃 Actividad del día",`
+ <div class="formGrid">
+   <div><label>Caminar — distancia (km)</label><input id="actKm" type="number" inputmode="decimal" step=".01" value="0" placeholder="Ej. 4"></div>
+   <div><label>Caminar — tiempo (min)</label><input id="actMin" type="number" inputmode="decimal" step="1" value="0" placeholder="Ej. 50"></div>
+   <div><label>Pasos del día</label><input id="actSteps" type="number" inputmode="numeric" min="0" value="0" placeholder="Ej. 8000"></div>
+   <div><label>Escaleras — pisos subidos</label><input id="actFloors" type="number" inputmode="numeric" min="0" value="0" placeholder="Ej. 10"></div>
+ </div>
+ <div class="result">
+   <div class="bigResult" id="actPrev">0 kcal</div>
+   <div class="hint" id="actDetail"></div>
+ </div>
+ <div class="hint" style="margin-top:10px">
+   Si introduces una caminata y también los pasos que incluyen esa caminata, los pasos se guardan como dato pero no vuelven a sumar calorías. Si no introduces caminata, los pasos pueden usarse para una estimación.
+ </div>`,
+ `<button class="secondary" id="cancel">Cancelar</button><button class="primary" id="add">Guardar actividad</button>`);
+
+ const calc=()=>{
+   const km=+el("actKm").value||0;
+   const min=+el("actMin").value||0;
+   const steps=+el("actSteps").value||0;
+   const floors=+el("actFloors").value||0;
+   const w=weightForDay();
+
+   let walkK=0, stepK=0, stairK=0;
+   let speed=0;
+
+   if(km>0 && min>0){
+     speed=km/(min/60);
+     const met=speed<3.2?2.8:speed<4?3.0:speed<5?3.5:speed<6.5?4.3:5.0;
+     walkK=met*3.5*w/200*min;
+   } else if(steps>0){
+     // Only estimate walking calories from steps when no explicit walk was entered.
+     const stepKm=steps*0.00075;
+     const assumedSpeed=5;
+     const assumedMin=stepKm/assumedSpeed*60;
+     const met=3.5;
+     stepK=met*3.5*w/200*assumedMin;
+   }
+
+   // Approximate net energy for climbing stairs using potential energy / 25% efficiency.
+   stairK=floors*3*9.81*w/0.25/4184;
+
+   const total=walkK+stepK+stairK;
+   el("actPrev").textContent=fmt(total)+" kcal";
+   const bits=[];
+   if(km>0 && min>0) bits.push(`caminar ${round(km,1)} km · ${min} min${speed?` · ${round(speed,1)} km/h`:""}`);
+   if(steps>0) bits.push(`${steps.toLocaleString("es-ES")} pasos`);
+   if(floors>0) bits.push(`${floors} pisos`);
+   el("actDetail").textContent=bits.join(" · ") || "Añade al menos una actividad";
+   return {km,min,steps,floors,walkK,stepK,stairK,total};
+ };
+
+ ["actKm","actMin","actSteps","actFloors"].forEach(id=>el(id).oninput=calc);
+ calc();
+
+ el("cancel").onclick=closeModal;
+ el("add").onclick=()=>{
+   const r=calc();
+   if(r.total<=0) return toast("Añade alguna actividad");
+
+   if(r.km>0 && r.min>0){
+     day().exercise.push({
+       name:"Caminar", emoji:"🚶", kcal:Math.round(r.walkK),
+       detail:`${r.km} km · ${r.min} min`
+     });
+   } else if(r.steps>0){
+     day().exercise.push({
+       name:"Pasos", emoji:"👟", kcal:Math.round(r.stepK),
+       detail:`${r.steps.toLocaleString("es-ES")} pasos · ~${round(r.steps*0.00075,1)} km estimados`
+     });
+   }
+
+   if(r.floors>0){
+     day().exercise.push({
+       name:"Escaleras", emoji:"🏢", kcal:Math.round(r.stairK),
+       detail:`${r.floors} pisos`
+     });
+   }
+
+   // If a walk was entered, steps are retained as metadata but are not converted into extra kcal.
+   if(r.km>0 && r.min>0 && r.steps>0){
+     const last=day().exercise[day().exercise.length - (r.floors>0?2:1)];
+     if(last && last.name==="Caminar"){
+       last.detail += ` · ${r.steps.toLocaleString("es-ES")} pasos del día`;
+     }
+   }
+
+   save();closeModal();render();toast("Actividad guardada");
+ };
 }
+
 function openStrength(){
  openModal("💪 Entrenamiento de fuerza",`
  <div><label>Tiempo</label><div class="pills"><button class="pill" data-m="20">20 min</button><button class="pill active" data-m="30">30 min</button><button class="pill" data-m="45">45 min</button><button class="pill" data-m="60">60 min</button></div></div>
@@ -245,7 +326,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>switchTab(b.d
 el("prevDay").onclick=()=>shiftDate(-1);el("nextDay").onclick=()=>shiftDate(1);
 el("date").onchange=()=>{current=el("date").value;render()};
 el("weight").oninput=()=>{day().weight=el("weight").value;save();render()};
-el("customFoodBtn").onclick=openCustomFood;el("walkBtn").onclick=openWalk;el("strengthBtn").onclick=openStrength;el("stairsBtn").onclick=openStairs;el("stepsBtn").onclick=openSteps;
+el("customFoodBtn").onclick=openCustomFood;el("activityBtn").onclick=openActivity;el("strengthBtn").onclick=openStrength;
 function shiftDate(n){let d=new Date(current+"T12:00:00");d.setDate(d.getDate()+n);current=d.toISOString().slice(0,10);render()}
 
 function renderHistory(){
